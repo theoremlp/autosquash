@@ -1,0 +1,77 @@
+name: theoremlp/autosquash action
+description: Enable automatic squash commits on PRs
+branding:
+  icon: git-merge
+  color: blue
+
+inputs:
+  github-token:
+    description: the GitHub token to use to change the PR state
+    required: true
+  pull-request-number:
+    description: the number of the target pull request
+    required: true
+  squash-commit-title:
+    description: the text to use as the squash commit title
+    required: true
+  squash-commit-message:
+    description: the text to use as the squash commit message
+    required: true
+  required-label:
+    description: require this label in order to enable automerge
+    required: false
+  do-not-merge-label:
+    description: requiore that this label is not present to enable automerge
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Enable Automatic Squash Commit
+      shell: bash
+      run: |
+        function pr_has_label {
+          if [[ -n "$(gh pr view --json labels --jq "select(.labels[].name | contains(\"$1\"))" "${{ inputs.pull-request-number }}")" ]]
+          then
+            echo "true"
+          else
+            echo "false"
+          fi
+        }
+
+        # disabling and re-enabling ensures up-to-date subject and body of squash commit
+        gh pr merge --squash --disable-auto "${{ inputs.pull-request-number }}"
+
+        export ENABLE="none"
+        if [[ -n "${{ inputs.required-label }}" ]]
+        then
+          export ENABLE="$(pr_has_label '${{ inputs.required-label }}')"
+        else
+          export ENABLE="true"
+        fi
+
+        if [[ -n "${{ inputs.do-not-merge-label }}" ]]
+        then
+          if [[ "$(pr_has_label '${{ inputs.do-not-merge-label }}')" == "true" ]]
+          then
+            echo "Disabling autosquash due to presence of do not merge label"
+            export ENABLE=false
+          fi
+        fi
+
+        if [[ "$ENABLE" == "true" ]]
+        then
+          echo "Enabling autosquash on PR"
+          echo "Title: $SQUASH_COMMIT_TITLE"
+          echo "Message:\n$SQUASH_COMMIT_MESSAGE"
+          gh pr merge --squash --auto \
+            --subject "$SQUASH_COMMIT_TITLE" \
+            --body "$SQUASH_COMMIT_MESSAGE" \
+            "${{ inputs.pull-request-number }}"
+        else
+          echo "Disabling autosquash on PR"
+        fi
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        SQUASH_COMMIT_TITLE: ${{ inputs.squash-commit-title }}
+        SQUASH_COMMIT_MESSAGE: ${{ inputs.squash-commit-message }}

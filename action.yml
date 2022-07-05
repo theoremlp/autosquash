@@ -39,6 +39,12 @@ runs:
           fi
         }
 
+        if [[ "$(gh pr view --json isDraft --jq '.isDraft' "${{ inputs.pull-request-number }}")" == "true" ]]
+        then
+          echo "Skipping because the PR is in a draft state."
+          exit 0
+        fi
+
         # disabling and re-enabling ensures up-to-date subject and body of squash commit
         gh pr merge --squash --disable-auto "${{ inputs.pull-request-number }}"
 

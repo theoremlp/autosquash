@@ -30,6 +30,8 @@ runs:
     - name: Enable Automatic Squash Commit
       shell: bash
       run: |
+        # autosquash bash script
+
         function pr_has_label {
           if [[ -n "$(gh pr view --json labels --jq "select(.labels[].name | contains(\"$1\"))" "${{ inputs.pull-request-number }}")" ]]
           then
@@ -69,7 +71,8 @@ runs:
         then
           echo "Enabling autosquash on PR"
           echo "Title: $SQUASH_COMMIT_TITLE"
-          echo "Message:\n$SQUASH_COMMIT_MESSAGE"
+          echo "Message:"
+          echo "$SQUASH_COMMIT_MESSAGE"
           gh pr merge --squash --auto \
             --subject "$SQUASH_COMMIT_TITLE" \
             --body "$SQUASH_COMMIT_MESSAGE" \

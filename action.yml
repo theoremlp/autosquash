@@ -47,9 +47,6 @@ runs:
           exit 0
         fi
 
-        # disabling and re-enabling ensures up-to-date subject and body of squash commit
-        gh pr merge --squash --disable-auto "${{ inputs.pull-request-number }}"
-
         export ENABLE="none"
         if [[ -n "${{ inputs.required-label }}" ]]
         then
@@ -63,7 +60,7 @@ runs:
           if [[ "$(pr_has_label '${{ inputs.do-not-merge-label }}')" == "true" ]]
           then
             echo "Disabling autosquash due to presence of do not merge label"
-            export ENABLE=false
+            export ENABLE="false"
           fi
         fi
 
@@ -79,6 +76,7 @@ runs:
             "${{ inputs.pull-request-number }}"
         else
           echo "Disabling autosquash on PR"
+          gh pr merge --squash --disable-auto "${{ inputs.pull-request-number }}"
         fi
       env:
         GH_TOKEN: ${{ inputs.github-token }}

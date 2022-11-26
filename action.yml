@@ -44,10 +44,13 @@ runs:
           fi
         }
 
-        if [[ "$(gh pr view --json author --jq ".author.login | contains(\"${{ inputs.ignore-author }}\")" "${{ inputs.pull-request-number }}")" == "true" ]]
+        if [[ -n "${{ inputs.ignore-author }}" ]]
         then
-          echo "Skipping because PR author is in the ignore list."
-          exit 0
+          if [[ "$(gh pr view --json author --jq ".author.login | contains(\"${{ inputs.ignore-author }}\")" "${{ inputs.pull-request-number }}")" == "true" ]]
+          then
+            echo "Skipping because PR author is in the ignore list."
+            exit 0
+          fi
         fi
 
         if [[ "$(gh pr view --json isDraft --jq '.isDraft' "${{ inputs.pull-request-number }}")" == "true" ]]

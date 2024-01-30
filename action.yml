@@ -76,6 +76,8 @@ runs:
           fi
         fi
 
+        PR_ID="$(gh pr view --json id ${{ inputs.pull-request-number }})"
+
         if [[ "$ENABLE" == "true" ]]
         then
           echo "Enabling autosquash on PR"
@@ -84,18 +86,21 @@ runs:
           echo "$SQUASH_COMMIT_MESSAGE"
           gh api graphql -f query="mutation PullRequestAutoMerge {
             enablePullRequestAutoMerge(input: {
-              pullRequestId: \"${{ inputs.pull-request-number }}\",
+              pullRequestId: \"$PR_ID\",
               commitHeadline: \"$SQUASH_COMMIT_TITLE\",
               commitBody: \"$SQUASH_COMMIT_MESSAGE\",
               mergeMethod: SQUASH
-            }) {clientMutationId}}"
+              })
+              {clientMutationId}
+            }"
         else
           echo "Disabling autosquash on PR"
           gh api graphql -f query="mutation DisablePullRequestAutoMerge {
             disablePullRequestAutoMerge(input: {
-              pullRequestId: \"${{ inputs.pull-request-number }}\",
-              clientMutationId: {clientMutationId}
-            })}"
+              pullRequestId: \"$PR_ID\",
+            })
+            {clientMutationId}
+          }"
         fi
       env:
         GH_TOKEN: ${{ inputs.github-token }}

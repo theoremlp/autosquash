@@ -76,7 +76,7 @@ runs:
           fi
         fi
 
-        PR_ID="$(gh pr view --json id ${{ inputs.pull-request-number }})"
+        PR_ID="$(gh pr view --json id --jq '.id' ${{ inputs.pull-request-number }})"
 
         if [[ "$ENABLE" == "true" ]]
         then

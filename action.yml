@@ -87,14 +87,15 @@ runs:
               pullRequestId: \"${{ inputs.pull-request-number }}\",
               commitHeadline: \"$SQUASH_COMMIT_TITLE\",
               commitBody: \"$SQUASH_COMMIT_MESSAGE\",
-              mergeMethod: \"SQUASH\"
+              mergeMethod: SQUASH
             }) {clientMutationId}}"
         else
           echo "Disabling autosquash on PR"
           gh api graphql -f query="mutation DisablePullRequestAutoMerge {
             disablePullRequestAutoMerge(input: {
-              pullRequestId: \"${{ inputs.pull-request-number }}\"
-            }) {clientMutationId}}"
+              pullRequestId: \"${{ inputs.pull-request-number }}\",
+              clientMutationId: {clientMutationId}
+            })}"
         fi
       env:
         GH_TOKEN: ${{ inputs.github-token }}

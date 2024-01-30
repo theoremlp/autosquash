@@ -84,6 +84,7 @@ runs:
           echo "Title: $SQUASH_COMMIT_TITLE"
           echo "Message:"
           echo "$SQUASH_COMMIT_MESSAGE"
+          echo "Node Id: $PR_ID"
           gh api graphql -f query="mutation PullRequestAutoMerge {
             enablePullRequestAutoMerge(input: {
               pullRequestId: \"$PR_ID\",
@@ -95,9 +96,10 @@ runs:
             }"
         else
           echo "Disabling autosquash on PR"
+          echo "Node Id: $PR_ID"
           gh api graphql -f query="mutation DisablePullRequestAutoMerge {
             disablePullRequestAutoMerge(input: {
-              pullRequestId: \"$PR_ID\",
+              pullRequestId: \"$PR_ID\"
             })
             {clientMutationId}
           }"

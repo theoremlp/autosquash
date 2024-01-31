@@ -44,6 +44,10 @@ runs:
           fi
         }
 
+        function escape {
+          echo $1 | sed 's/"/\\"/g'
+        }
+
         if [[ -n "${{ inputs.ignore-author }}" ]]
         then
           if [[ "$(gh pr view --json author --jq ".author.login | contains(\"${{ inputs.ignore-author }}\")" "${{ inputs.pull-request-number }}")" == "true" ]]
@@ -80,23 +84,23 @@ runs:
 
         if [[ "$ENABLE" == "true" ]]
         then
-          echo "Enabling autosquash on PR"
+          echo "Enabling autosquash on PR #${{ inputs.pull-request-number }}"
           echo "Title: $SQUASH_COMMIT_TITLE"
           echo "Message:"
           echo "$SQUASH_COMMIT_MESSAGE"
-          echo "Node Id: $PR_ID"
+          echo "---"
           gh api graphql -f query="mutation PullRequestAutoMerge {
             enablePullRequestAutoMerge(input: {
               pullRequestId: \"$PR_ID\",
-              commitHeadline: \"$SQUASH_COMMIT_TITLE\",
-              commitBody: \"$SQUASH_COMMIT_MESSAGE\",
+              commitHeadline: \"$(escape $SQUASH_COMMIT_TITLE)\",
+              commitBody: \"$(escape $SQUASH_COMMIT_MESSAGE)\",
               mergeMethod: SQUASH
-              })
-              {clientMutationId}
-            }"
+            })
+            {clientMutationId}
+          }"
         else
-          echo "Disabling autosquash on PR"
-          echo "Node Id: $PR_ID"
+          echo "Disabling autosquash on PR #${{ inputs.pull-request-number }}"
+          echo "---"
           gh api graphql -f query="mutation DisablePullRequestAutoMerge {
             disablePullRequestAutoMerge(input: {
               pullRequestId: \"$PR_ID\"

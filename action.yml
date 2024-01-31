@@ -92,8 +92,8 @@ runs:
           gh api graphql -f query="mutation PullRequestAutoMerge {
             enablePullRequestAutoMerge(input: {
               pullRequestId: \"$PR_ID\",
-              commitHeadline: \"$(escape $SQUASH_COMMIT_TITLE)\",
-              commitBody: \"$(escape $SQUASH_COMMIT_MESSAGE)\",
+              commitHeadline: \"$(escape "$SQUASH_COMMIT_TITLE")\",
+              commitBody: \"$(escape "$SQUASH_COMMIT_MESSAGE")\",
               mergeMethod: SQUASH
             })
             {clientMutationId}

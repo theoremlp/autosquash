@@ -45,7 +45,7 @@ runs:
         }
 
         function escape {
-          echo $1 | sed 's/"/\\"/g'
+          echo "$1" | sed 's/"/\\"/g'
         }
 
         if [[ -n "${{ inputs.ignore-author }}" ]]

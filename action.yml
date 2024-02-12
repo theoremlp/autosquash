@@ -44,10 +44,6 @@ runs:
           fi
         }
 
-        function escape {
-          echo "$1" | sed 's/"/\\"/g'
-        }
-
         if [[ -n "${{ inputs.ignore-author }}" ]]
         then
           if [[ "$(gh pr view --json author --jq ".author.login | contains(\"${{ inputs.ignore-author }}\")" "${{ inputs.pull-request-number }}")" == "true" ]]

@@ -89,24 +89,30 @@ runs:
           echo "Message:"
           echo "$SQUASH_COMMIT_MESSAGE"
           echo "---"
-          gh api graphql -f query="mutation PullRequestAutoMerge {
+          gh api graphql \
+            -F pr_id="$PR_ID" \
+            -F subject="$SQUASH_COMMIT_TITLE" \
+            -F body="$SQUASH_COMMIT_MESSAGE" \
+            -f query='mutation PullRequestAutoMerge($pr_id: ID!, $subject: String, $body: String) {
             enablePullRequestAutoMerge(input: {
-              pullRequestId: \"$PR_ID\",
-              commitHeadline: \"$(escape "$SQUASH_COMMIT_TITLE")\",
-              commitBody: \"$(escape "$SQUASH_COMMIT_MESSAGE")\",
+              pullRequestId: $pr_id,
+              commitHeadline: $subject,
+              commitBody: $body,
               mergeMethod: SQUASH
             })
             {clientMutationId}
-          }"
+          }'
         else
           echo "Disabling autosquash on PR #${{ inputs.pull-request-number }}"
           echo "---"
-          gh api graphql -f query="mutation DisablePullRequestAutoMerge {
+          gh api graphql \
+            -F pr_id="$PR_ID" \
+            -f query='mutation DisablePullRequestAutoMerge($pr_id: ID!) {
             disablePullRequestAutoMerge(input: {
-              pullRequestId: \"$PR_ID\"
+              pullRequestId: $pr_id
             })
             {clientMutationId}
-          }"
+          }'
         fi
       env:
         GH_TOKEN: ${{ inputs.github-token }}
